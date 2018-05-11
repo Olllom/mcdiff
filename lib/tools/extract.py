@@ -6,6 +6,7 @@ AG, August 21, 2013"""
 
 import numpy as np
 
+
 def count_2D(B,X,Y,Z,edges,redges,shift=1):
     print B.shape
     assert len(B.shape) == 3
@@ -66,11 +67,11 @@ def write_Tmat_square(A,filename,lt,count,edges=None,dt=None,dn=None):
     print >> f, "#lt   ", lt  # lag time
     print >> f, "#count", count # how transitions were counted
 
-    if dt != None:
+    if dt is not None:
         print >> f, "#dt   ", dt
-    if dn != None:
+    if dn is not None:
         print >> f, "#dn   ", dn
-    if edges != None:
+    if edges is not None:
         print >> f, "#edges ", " ".join([str(b) for b in edges])
 
     for i in xrange(L):
@@ -93,11 +94,11 @@ def write_Tmat_cube(B,filename,lt,count,edges=None,redges=None,dt=None,dn=None):
 
     if dt != None:
         print >> f, "#dt   ", dt
-    if dn != None:
+    if dn is not None:
         print >> f, "#dn   ", dn
-    if edges != None:
+    if edges is not None:
         print >> f, "#edges ", " ".join([str(b) for b in edges])
-    if redges != None:
+    if redges is not None:
         print >> f, "#redges ", " ".join([str(b) for b in redges])
 
     for i in xrange(size_r):

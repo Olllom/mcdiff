@@ -1,5 +1,6 @@
 #!/bin/env/python
 
+
 if __name__ == "__main__":
     from distutils.core import setup
     from glob import glob
@@ -13,13 +14,16 @@ if __name__ == "__main__":
         package_dir = {'mcdiff': 'lib'},
         packages = ['mcdiff','mcdiff.tools','mcdiff.permeability'],
         scripts=glob("scripts/*"),
+
+
         classifiers=[
             #'Development Status :: 3 - Alpha',
             #'Environment :: Console',
             #'Intended Audience :: Science/Research',
             #'License :: OSI Approved :: GNU General Public License (GPL)',
             #'Operating System :: POSIX :: Linux',
-            'Programming Language :: Python',
+            'Programming Language :: Python :: 2.7'
         ],
+
     )
 
