@@ -71,6 +71,7 @@ def plot_F(F,filename,edges,title="free energy",pbc=True,legend=None,grey=False,
     plt.title(title)
     plt.ylim(0,4)
     if legend is not None: plt.legend(legend)
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 def plot_D(D,filename,edges,title="diffusion",pbc=True,legend=None,grey=False,
@@ -119,6 +120,7 @@ def plot_D(D,filename,edges,title="diffusion",pbc=True,legend=None,grey=False,
     if legend is not None:  # and error is None:    # not sure why this worked like that??
         plt.legend(legend)
     #plt.tight_layout()
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 def plot_Drad(Drad,filename,edges,title="rad-diffusion",pbc=True,legend=None,grey=False,
@@ -163,7 +165,7 @@ def plot_Drad(Drad,filename,edges,title="rad-diffusion",pbc=True,legend=None,gre
     plt.title(title)
     if legend is not None:  # and error is None:    # not sure why this worked like that??
         plt.legend(legend)
-    #plt.tight_layout()
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 
@@ -186,6 +188,7 @@ def plot_both(F,D,filename,edges,transparent=False):
         plt.ylabel("D [A^2/ps]")
         plt.xlabel("z [A]")
 
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 def plot_three(F,D,Drad,filename,edges,transparent=False):
@@ -216,6 +219,7 @@ def plot_three(F,D,Drad,filename,edges,transparent=False):
         plt.ylabel(r"$D_{||}$ ($\AA^2/$ps)")
 
     plt.xlabel(r"$z$ ($\AA$)")
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 def plot_ratio(D,Drad,filename,edges,title="anisotropy",transparent=False):
@@ -260,7 +264,7 @@ def plot_ratio(D,Drad,filename,edges,title="anisotropy",transparent=False):
         #plt.plot([x[0],x[-1]],[0.,0.],color='k',lw=1)
         #plt.ylabel("Drad-D")
         #plt.xlabel("z [A]")
-
+    plt.tight_layout()
     plt.savefig(filename,transparent=transparent)
 
 
