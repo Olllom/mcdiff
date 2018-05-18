@@ -1,0 +1,59 @@
+* output transition matrix for water
+* first @FF last @LF
+*
+
+! first_lag @FL last_lag @LL incr_lag @IL
+
+stream "$RTFPRM"
+stream "$PSFCRD"
+stream "$CRYST"
+
+! determine water segment name
+define tmp sele resid 1 .and. type OH2 end
+set wseg = ?SELSEGI
+
+! compute derived values
+calc n = 1 + ( @LF - @FF )
+calc mxt = @N * 1000
+calc mxa = ?NATOM
+define tmp sele atom @WSEG * OH2 end
+set nw = ?NSEL
+calc mxs = 1 + @NW
+
+! start correl
+correl maxt @MXT maxs @MXS maxa @MXA noupdate
+
+! cell height
+enter ccel cell C
+
+! water molecule c.o.m. Z
+set k = 1
+label enwat
+ enter w@K atom z sele atom @WSEG @K * end mass
+ incr k by 1
+if k le @NW goto enwat
+
+! open traj files
+set k = @FF
+set u = 101
+label openlp
+ open unit @U read file name "$TRAJECTORY@K.trj"
+ incr u by 1
+ incr k by 1
+if k le @LF goto openlp
+
+! fill TQ array with data requested in ENTER statements
+traj firstu 101 nunit @N
+
+! compute, write TMAT at different lag times
+set lag = 10
+label lagloop
+ open unit 2 write card name wtmat100.@LAG.txt
+ tmat W1 edge CCEL nmol @NW nbin 100 lagt @LAG writ 2
+ incr lag by 10
+if lag le 50 goto lagloop
+
+end
+
+stop
+
