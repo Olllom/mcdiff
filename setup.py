@@ -5,11 +5,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from glob import glob
-
+try:
+    import mcdiff
+    version = mcdiff.__version__
+except:
+    version = "0.0.0"
 
 setup(name='mcdiff',
-    version='0.001',
+    version=version,
     description='Program to find diffusion parameters with Monte Carlo routine.',
     #author='An Ghysels',
     #author_email='An.Ghysels@UGent.be',
