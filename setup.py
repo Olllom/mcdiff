@@ -14,17 +14,21 @@ setup(name='mcdiff',
     #author='An Ghysels',
     #author_email='An.Ghysels@UGent.be',
     #url='http://molmod.ugent.be/code/',
-    package_dir = {'mcdiff': 'lib'},
-    packages = ['mcdiff','mcdiff.tools','mcdiff.permeability'],
-    scripts=glob("scripts/*"),
+    package_dir = {'mcdiff': 'mcdiff'},
+    packages=['mcdiff','mcdiff.tools','mcdiff.permeability'],
+    entry_points={
+        'console_scripts': [
+            'mcdiff=mcdiff.cli:main',
+            'run-mcdiff=mcdiff.cli:run_mcdiff',
+            'plotresults=mcdiff.cli:plotresults'
+        ]
+    },
     install_requires=[
         "numpy",
         "scipy",
         "matplotlib",
         "six"
     ],
-
-
     classifiers=[
         #'Development Status :: 3 - Alpha',
         #'Environment :: Console',

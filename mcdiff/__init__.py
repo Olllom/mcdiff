@@ -4,3 +4,4 @@
 # An Ghysels (August 2012)
 #
 
+__version__ = '2012'
