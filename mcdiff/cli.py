@@ -2,20 +2,26 @@
 Command line interface for 'mcdiff' and subcommands.
 """
 
-from argparse import ArgumentParser, REMAINDER
+from __future__ import print_function
+
+import os
+from argparse import ArgumentParser
+
+from six.moves import configparser
 
 from mc import find_parameters
 from outreading import read_many_profiles
 from outreading import read_many_profiles_Drad
 from plot import make_plots
+import charmm
 
 
 def run(options):
-    print "options:"
-    print options.__dict__
+    print("options:")
+    print(options.__dict__)
     # check arguments
     assert len(options.trans_mat_files) >= 1
-    print "="*20
+    print("="*20)
     find_parameters(options.trans_mat_files, options.pbc, options.model,
                 options.dv, options.dw, options.dwrad, options.D0, options.dtimezero,
                 options.temp, options.temp_end,
@@ -111,9 +117,9 @@ def parse_run(parser):
 
 
 def plot(options):
-    print "options:"
-    print options.__dict__
-    print "="*20
+    print("options:")
+    print(options.__dict__)
+    print("="*20)
 
     if options.outfile is None:
         options.outfile = "all"
@@ -162,13 +168,17 @@ def parse_plot(parser):
     parser.set_defaults(func=plot)
 
 
-def charmm():
-    pass
+def charmm(args):
+    assert os.path.isfile(args.config_file), "Config file not found."
+    print("Starting mcdiff charmm with configuration from {}".format(args.config_file))
+    config = configparser.ConfigParser()
+    config.read(args.config_file)
+    charmm.process_all(config)
 
 
 def parse_charmm(parser):
-    pass
-
+    parser.add_argument("config_file")
+    parser.set_defaults(func=charmm)
 
 
 def define_version(parser):
