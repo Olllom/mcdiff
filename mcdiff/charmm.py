@@ -122,7 +122,7 @@ def make_transition_matrices_charmm(sim_id, config):
     executable = config.get("charmm", "executable")
     script = config.get("charmm", "script")
     # call charmm
-    #  -- this in an awkward workaround for charmm not allowing to write to mixed-case filenames --
+    #  -- this in a workaround for charmm not allowing to write to mixed-case filenames --
     tmp_tmat = os.path.join("/tmp", str(random.random()))
     command = "{} FF:{} LF:{} FL:{} LL:{} IL:{} TRJ:{} TMAT:{}".format(
         executable, firstfr, lastfr, lag_start, lag_end, lag_inc,
@@ -145,7 +145,7 @@ def make_transition_matrices_charmm(sim_id, config):
                              "the charmm script. Check for errors in "
                              "{}".format(outfile))
     for lt in lagtimes:
-        tmp = "{}_{}".format(tmp_tmat, lt)
+        tmp = "{}{}".format(tmp_tmat, lt)
         assert os.path.isfile(tmp), ("Could not find output files from CHARMM."
                                      "Check for errors in CHARMM output: "
                                      "{}".format(outfile))

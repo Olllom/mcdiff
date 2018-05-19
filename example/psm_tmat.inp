@@ -1,5 +1,5 @@
 * output transition matrix for water
-* first @FF last @LF firstlag @FL lastlag @LL inclag @IL trj @TRJ tmat @TMAT
+* first @FF last @LF lag1 @FL lagn @LL inc @IL trj @TRJ tmat @TMAT
 *
 
 stream rtfprm.str
@@ -47,7 +47,7 @@ traj firstu 101 nunit @N
 ! compute, write TMAT at different lag times
 set lag = @FL
 label lagloop
- open unit 2 write card name @TMAT_@LAG
+ open unit 2 write card name @TMAT@LAG
  tmat W1 edge CCEL nmol @NW nbin 100 lagt @LAG writ 2
 incr lag by @IL
 if lag le @LL goto lagloop
