@@ -168,17 +168,18 @@ def parse_plot(parser):
     parser.set_defaults(func=plot)
 
 
-def charmm(args):
+def chm(args):
     assert os.path.isfile(args.config_file), "Config file not found."
-    print("Starting mcdiff charmm with configuration from {}".format(args.config_file))
+    print("Starting mcdiff chm with configuration from {}".format(args.config_file))
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read(args.config_file)
     charmm.process_all(config)
 
 
-def parse_charmm(parser):
+def parse_chm(parser):
     parser.add_argument("config_file")
-    parser.set_defaults(func=charmm)
+    parser.set_defaults(func=chm)
 
 
 def define_version(parser):
@@ -191,7 +192,7 @@ def main():
     subparsers = main_parser.add_subparsers(title="subcommands", description="")
     parse_run(subparsers.add_parser("run"))
     parse_plot(subparsers.add_parser("plot"))
-    parse_charmm(subparsers.add_parser("charmm"))
+    parse_chm(subparsers.add_parser("chm"))
     args = main_parser.parse_args()
     args.func(args)
 
