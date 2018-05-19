@@ -173,7 +173,8 @@ def get_config(config_file):
     assert os.path.isfile(config_file), "Config file not found."
     config = configparser.ConfigParser()
     config.optionxform = str
-    return config.read(config_file)
+    config.read(config_file)
+    return config
 
 
 def chm(args):
