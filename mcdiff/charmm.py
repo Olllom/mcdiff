@@ -150,7 +150,7 @@ def make_transition_matrices_charmm(sim_id, config):
                                      "Check for errors in CHARMM output: "
                                      "{}".format(outfile))
         shutil.move(tmp, tmat_file(config, sim_id, lt))
-    print("Transition matrices for {} assembled:", sim_id)
+    print("Transition matrices for {} assembled:".format(sim_id))
 
 
 def process_one_lag_time(index, id_lag_pairs, config):
