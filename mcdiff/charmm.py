@@ -12,8 +12,7 @@ import subprocess
 import os
 import random
 import shutil
-
-import cli
+import warnings
 
 
 def tmat_file(config, sim_id, lag_time):
@@ -33,12 +32,12 @@ def profiles_file(config, sim_id, lag_time, task):
         "profiles.{}.{}.{}.dat".format(sim_id, lag_time, task)
     ))
 
+
 def log_file(config, sim_id, lag_time, task):
     return os.path.abspath(os.path.join(
         config.get("general","output_dir"),
         "profiles.{}.{}.{}.log".format(sim_id, lag_time, task)
     ))
-
 
 def run_mcdiff_one_tmat(config, sim_id, lag_time):
     """
@@ -99,7 +98,7 @@ def run_mcdiff_one_tmat(config, sim_id, lag_time):
     return prod_out
 
 
-def make_transition_matrix_charmm(config, sim_id, lag_time):
+def make_transition_matrices_charmm(sim_id, config):
     """
     Wrapper for the CHARMM command to extract the transition matrix.
     config: ConfigParser Instance
@@ -107,18 +106,17 @@ def make_transition_matrix_charmm(config, sim_id, lag_time):
     Args:
         config: ConfigParser instance.
         sim_id: ID of the replica.
-        lag_time: .
-
-    Returns:
-        Filename of the transition matrix.
     """
-    # pass, if transition matrix exists
-    tmat = tmat_file(config, sim_id, lag_time)
-    if os.path.isfile(tmat):
-        print("Transition matrix {} exists. Not updating.".format(tmat))
-        return tmat
-    # get info from config file
-    print("Assembling transition matrix from charmm command:")
+    # get lag times
+    lag_start = int(config.get("general", "lag_start"))
+    lag_end = int(config.get("general", "lag_end"))
+    lag_inc = int(config.get("general", "lag_inc"))
+    lagtimes = range(lag_start, lag_end+1, lag_inc)
+    # pass, if all transition matrices exists
+    if all(os.path.isfile(tmat_file(config, sim_id, lt)) for lt in lagtimes):
+        print("Transition matrices for {} exists. Not updating.".format(sim_id))
+    # get charmm info from config file
+    print("Assembling transition matrices from charmm command:")
     traj, firstfr, lastfr = eval(config.get("general", "trajectories"))[sim_id]
     exedir = eval(config.get("charmm", "exe_dirs"))[sim_id]
     executable = config.get("charmm", "executable")
@@ -126,34 +124,37 @@ def make_transition_matrix_charmm(config, sim_id, lag_time):
     # call charmm
     #  -- this in an awkward workaround for charmm not allowing to write to mixed-case filenames --
     tmp_tmat = os.path.join("/tmp", str(random.random()))
-    command = "{} FF:{} LF:{} LAG:{} TRJ:{} TMAT:{}".format(
-        executable, firstfr, lastfr, lag_time, os.path.abspath(traj), tmp_tmat)
+    command = "{} FF:{} LF:{} FL:{} LL:{} IL:{} TRJ:{} TMAT:{}".format(
+        executable, firstfr, lastfr, lag_start, lag_end, lag_end,
+        os.path.abspath(traj), tmp_tmat)
     print("...", command)
     outfile = os.path.join(config.get("general","output_dir"),
-                           "chm_tmat.{}.{}.out".format(sim_id, lag_time))
+                           "chm_tmat.{}.out".format(sim_id))
     with open(outfile,"w") as stdout:
         with open(script,"r") as stdin:
             p = subprocess.Popen(command.strip().split(),
                                  stdin=stdin,
-                                 env=os.environ.copy().update({"TMAT": tmat}),
                                  stdout=stdout,
                                  stderr=subprocess.STDOUT,
                                  cwd=os.path.abspath(exedir)
                                  )
             p.communicate()
             rc = p.returncode
-            assert rc == 0, ("Something went wrong while executing "
+            if rc != 0:
+                warnings.warn("Something might have gone wrong while executing "
                              "the charmm script. Check for errors in "
                              "{}".format(outfile))
-    shutil.move(tmp_tmat, tmat)
-    assert os.path.isfile(tmat)
-    print("Transition matrix assembled:", tmat)
-    return tmat
+    for lt in lagtimes:
+        tmp = "{}_{}".format(tmp_tmat, lt)
+        assert os.path.isfile(tmp), ("Something went wrong while executing "
+                                     "the charmm script. Check for errors in "
+                                     "{}".format(outfile))
+        shutil.move(tmp, tmat_file(config, sim_id, lt))
+    print("Transition matrices for {} assembled:", sim_id)
 
 
 def process_one_lag_time(index, id_lag_pairs, config):
     sim_id, lag_time = id_lag_pairs[index]
-    make_transition_matrix_charmm(config, sim_id, lag_time)
     run_mcdiff_one_tmat(config, sim_id, lag_time)
 
 
@@ -171,10 +172,23 @@ def process_all(config):
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
 
-    # parallelize over sim_ids and lag times
+    # create matrices (parallelize over sim_ids)
     sim_ids = eval(config.get("general", "trajectories")).keys()
-    lag_times = config.get("general", "lag_times").strip().split(",")
-    lag_times = [int(lt) for lt in lag_times]
+    mk_matrices = partial(make_transition_matrices_charmm, config=config)
+    if parallel:
+        pool = multiprocessing.Pool(len(sim_ids))
+        pool.map(mk_matrices, sim_ids)
+        pool.close()
+        pool.join()
+    else:
+        for id in range(sim_ids):
+            mk_matrices(id)
+
+    # run mcdiff (parallelize over sim_ids and lag times)
+    lag_start = int(config.get("general", "lag_start"))
+    lag_end = int(config.get("general", "lag_end"))
+    lag_inc = int(config.get("general", "lag_inc"))
+    lag_times = range(lag_start, lag_end+1, lag_inc)
     # helper function to give the processes to a pool of workers
     pairs = tuple(product(sim_ids, lag_times))
     proc_one_lag = partial(process_one_lag_time, id_lag_pairs=pairs, config=config)

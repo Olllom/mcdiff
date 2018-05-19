@@ -14,6 +14,7 @@ from outreading import read_many_profiles
 from outreading import read_many_profiles_Drad
 from plot import make_plots
 import charmm
+import ana
 
 
 def run(options):
@@ -168,18 +169,31 @@ def parse_plot(parser):
     parser.set_defaults(func=plot)
 
 
-def chm(args):
-    assert os.path.isfile(args.config_file), "Config file not found."
-    print("Starting mcdiff chm with configuration from {}".format(args.config_file))
+def get_config(config_file):
+    assert os.path.isfile(config_file), "Config file not found."
     config = configparser.ConfigParser()
     config.optionxform = str
-    config.read(args.config_file)
-    charmm.process_all(config)
+    return config.read(config_file)
+
+
+def chm(args):
+    print("Starting mcdiff chm with configuration from {}".format(args.config_file))
+    charmm.process_all(get_config(args.config_file))
 
 
 def parse_chm(parser):
     parser.add_argument("config_file")
     parser.set_defaults(func=chm)
+
+
+def analysis(args):
+    print("Starting mcdiff analysis with configuration from {}".format(args.config_file))
+    ana.do_analysis(args)
+
+
+def parse_analysis(parser):
+    parser.add_argument("config_file")
+    parser.set_defaults(func=analysis)
 
 
 def define_version(parser):
@@ -193,6 +207,7 @@ def main():
     parse_run(subparsers.add_parser("run"))
     parse_plot(subparsers.add_parser("plot"))
     parse_chm(subparsers.add_parser("chm"))
+    parse_analysis(subparsers.add_parser("analysis"))
     args = main_parser.parse_args()
     args.func(args)
 
