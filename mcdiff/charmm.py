@@ -166,6 +166,7 @@ def process_all(config):
         traj_file: Trajectory
     """
     # make output directory
+    parallel = config.getboolean("general", "parallel")
     outdir = config.get("general", "output_dir")
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
@@ -177,12 +178,17 @@ def process_all(config):
     # helper function to give the processes to a pool of workers
     pairs = tuple(product(sim_ids, lag_times))
     proc_one_lag = partial(process_one_lag_time, id_lag_pairs=pairs, config=config)
-    if True:
+    if parallel:
         pool = multiprocessing.Pool(len(pairs))
         pool.map(proc_one_lag, range(len(pairs)))
+        pool.close()
         pool.join()
     else:
         for i in range(len(pairs)):
             proc_one_lag(i)
+    print("")
+    print("="*50)
+    print(" "*10, "Command mcdiff chm finished.")
+    print("=" * 50)
 
 
