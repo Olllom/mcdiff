@@ -1,18 +1,28 @@
-#!/bin/python
+"""
+Logger functionality to store the history of a Monte-Carlo run.
+"""
 
 import numpy as np
 
+
 class Logger(object):
+    """
+    Container class to store the history of a MC run.
+    """
     def __init__(self,MC):
-        self.nmc = MC.nmc
-        self.freq = 100
-        nf = MC.nmc/self.freq+1  # if n=1000, then I want 11 stores / if n=999, then I want 10 stores
-        self.nf = nf
+        """
+        Args:
+            MC: MCState instance.
+        """
+        self.nmc = MC.nmc           # ! Number of Monte Carlo steps
+        self.freq = 100             # ! Saving frequency
+        nf = MC.nmc/self.freq+1     # if n=1000, then I want 11 stores / if n=999, then I want 10 stores
+        self.nf = nf                # ! Number of frames in Logger
 
         # arrays
-        self.log_like  = np.zeros((nf),float)
+        self.log_like  = np.zeros((nf),float)   # ! Log-likelihood
         self.timezero  = np.zeros((nf),float)
-        self.dv        = np.zeros((nf),float)
+        self.dv        = np.zeros((nf),float)   # !
         self.dw        = np.zeros((nf),float)
         self.dwrad     = np.zeros((nf),float)
         self.dtimezero = np.zeros((nf),float)
@@ -31,7 +41,7 @@ class Logger(object):
             else:
                 self.wrad_coeff = np.zeros((nf,MC.model.ncosDrad),float)
 
-    def log(self,j,MC):  # j is counter, counting starts with 1, ends with nmc
+    def log(self, j, MC):  # j is counter, counting starts with 1, ends with nmc
         i = j/self.freq   # if n=1000, freq=100, then store 0,100,...,900,1000 
         if i*self.freq == j:
             #print i,j,self.freq,self.v.shape,MC.model.v.shape

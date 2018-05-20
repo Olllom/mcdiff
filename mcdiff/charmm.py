@@ -115,6 +115,7 @@ def make_transition_matrices_charmm(sim_id, config):
     # pass, if all transition matrices exists
     if all(os.path.isfile(tmat_file(config, sim_id, lt)) for lt in lagtimes):
         print("Transition matrices for {} exists. Not updating.".format(sim_id))
+        return
     # get charmm info from config file
     print("Assembling transition matrices from charmm command:")
     traj, firstfr, lastfr = eval(config.get("general", "trajectories"))[sim_id]
@@ -150,7 +151,7 @@ def make_transition_matrices_charmm(sim_id, config):
                                      "Check for errors in CHARMM output: "
                                      "{}".format(outfile))
         shutil.move(tmp, tmat_file(config, sim_id, lt))
-    print("Transition matrices for {} assembled:".format(sim_id))
+    print("Transition matrices for {} assembled.".format(sim_id))
 
 
 def process_one_lag_time(index, id_lag_pairs, config):
@@ -162,6 +163,7 @@ def process_all(config):
     """
     Create transition matrices and run Bayesian analysis for one simulation.
     Parallelize over simulation ids and lag times.
+
     Args:
         config: A ConfigParser object.
         traj_file: Trajectory
