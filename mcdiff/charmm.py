@@ -154,6 +154,56 @@ def make_transition_matrices_charmm(sim_id, config):
     print("Transition matrices for {} assembled.".format(sim_id))
 
 
+def extract_density_charmm(sim_id, config, script, output_dir):
+    """
+    Wrapper for the CHARMM command to extract the transition matrix.
+    config: ConfigParser Instance
+
+    Args:
+        config: ConfigParser instance.
+        sim_id: ID of the replica.
+    """
+
+    density_file = os.path.abspath(
+            os.path.join(output_dir,"density{}.txt".format(sim_id)))
+
+    # pass, if all output files exists
+    if os.path.isfile(density_file):
+        print("Densities and PMFs for {} exists. Not updating.".format(sim_id))
+        return density_file
+
+    # get charmm info from config file
+    print("Assembling densities from charmm command:")
+    traj, firstfr, lastfr = eval(config.get("general", "trajectories"))[sim_id]
+    exedir = eval(config.get("charmm", "exe_dirs"))[sim_id]
+    executable = config.get("charmm", "executable")
+    # call charmm
+    #  -- this in a workaround for charmm not allowing to write to mixed-case filenames --
+    tmp_dens = os.path.join("/tmp", str(random.random()))
+    command = "{} FF:{} LF:{} TRJ:{} DENS:{}".format(
+        executable, firstfr, lastfr, os.path.abspath(traj), tmp_dens)
+    print("...", command)
+    outfile = os.path.join(output_dir,
+                           "chm_dens.{}.out".format(sim_id))
+    with open(outfile,"w") as stdout:
+        with open(script,"r") as stdin:
+            p = subprocess.Popen(command.strip().split(),
+                                 stdin=stdin,
+                                 stdout=stdout,
+                                 stderr=subprocess.STDOUT,
+                                 cwd=os.path.abspath(exedir)
+                                 )
+            p.communicate()
+            rc = p.returncode
+            if rc != 0:
+                warnings.warn("Something might have gone wrong while executing "
+                              "the charmm script. Check for errors in "
+                              "{}".format(outfile))
+    shutil.move(tmp_dens, density_file)
+    print("Densities for {} extracted.".format(sim_id))
+    return density_file
+
+
 def process_one_lag_time(index, id_lag_pairs, config):
     sim_id, lag_time = id_lag_pairs[index]
     run_mcdiff_one_tmat(config, sim_id, lag_time)

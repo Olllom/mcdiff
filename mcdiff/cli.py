@@ -187,6 +187,37 @@ def parse_chm(parser):
     parser.set_defaults(func=chm)
 
 
+def chm_density(args):
+    print("Extracting densities with configuration from {}".format(
+        args.config_file))
+    assert os.path.isfile(args.density_script), (
+        "Charmm script {} does not exist.".format(args.density_script)
+    )
+    if not os.path.isdir(args.output_dir):
+        os.mkdir(args.output_dir)
+    config = get_config(args.config_file)
+    outdir = config.get("general", "output_dir")
+    sim_ids = eval(config.get("general", "trajectories")).keys()
+    for sim_id in sim_ids:
+        charmm.extract_density_charmm(
+            sim_id, config, args.density_script, args.output_dir
+        )
+
+
+def parse_chm_density(parser):
+    parser.add_argument("config_file")
+    parser.add_argument("-s", "--script", dest="density_script",
+                        default="zwat.inp",
+                        help="CHARMM script ^to extract "
+                             "densities from trajectories "
+                             "[default: zwat.inp].")
+    parser.add_argument("-o", "--output_dir", dest="output_dir",
+                        default="densities",
+                        help="Output directory for densities "
+                             "[default: ./densities/].")
+    parser.set_defaults(func=chm_density)
+
+
 def analysis(args):
     print("Starting mcdiff analysis with configuration from {}".format(args.config_file))
     ana.do_analysis(args)
@@ -208,6 +239,7 @@ def main():
     parse_run(subparsers.add_parser("run"))
     parse_plot(subparsers.add_parser("plot"))
     parse_chm(subparsers.add_parser("chm"))
+    parse_chm_density(subparsers.add_parser("chm_density"))
     parse_analysis(subparsers.add_parser("analysis"))
     args = main_parser.parse_args()
     args.func(args)
