@@ -180,7 +180,7 @@ def extract_density_charmm(sim_id, config, script, output_dir):
     # call charmm
     #  -- this in a workaround for charmm not allowing to write to mixed-case filenames --
     tmp_dens = os.path.join("/tmp", str(random.random()))
-    command = "{} FF:{} LF:{} TRJ:{} DENS:{}".format(
+    command = "{} MXZ:40 FF:{} LF:{} TRJ:{} DENS:{}".format(
         executable, firstfr, lastfr, os.path.abspath(traj), tmp_dens)
     print("...", command)
     outfile = os.path.join(output_dir,
@@ -199,6 +199,11 @@ def extract_density_charmm(sim_id, config, script, output_dir):
                 warnings.warn("Something might have gone wrong while executing "
                               "the charmm script. Check for errors in "
                               "{}".format(outfile))
+    assert os.path.isfile(tmp_dens), (
+        "Something has gone wrong while executing "
+        "the charmm script. Check for errors in "
+        "{}".format(outfile)
+    )
     shutil.move(tmp_dens, density_file)
     print("Densities for {} extracted.".format(sim_id))
     return density_file
