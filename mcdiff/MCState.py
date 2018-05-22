@@ -11,7 +11,7 @@ from utils import init_rate_matrix, string_energy, string_vecs, log_likelihood, 
 from twod import rad_log_like_lag, setup_bessel_functions
 
 from model import Model, RadModel
-from model import SinusCosinusModel,CosinusModel, RadCosinusModel
+from model import SinusCosinusModel,CosinusModel, RadCosinusModel, CosinusModelOnlyD
 from model import StepModel, OneStepModel
 from outreading import read_Fcoeffs, read_Dcoeffs, read_Dradcoeffs, read_dv_dw, read_F_D_edges
 
@@ -60,7 +60,7 @@ class MCState(object):
 
         self.k = k  # spring constant in function spring
 
-    def set_model(self,model,data,ncosF,ncosD,ncosDrad):
+    def set_model(self,model,data,ncosF,ncosD,ncosDrad, F_profile=None):
         self.data = data   # transitions etc        
 
         ncosP = 0
@@ -89,6 +89,8 @@ class MCState(object):
                 self.model = OneStepModel(self.data,self.D0,ncosF,ncosD,ncosP)
             elif model == "Model":
                 self.model = Model(self.data,self.D0)
+            elif model == "CosinusModelOnlyD":
+                self.model = CosinusModelOnlyD(self.data,self.D0,ncosF,ncosD,ncosP, F_profile)
             else:
                 raise ValueError("model %s not found" % model)
         assert self.pbc == self.model.pbc  # make sure PBC for model and transition matrix are identical

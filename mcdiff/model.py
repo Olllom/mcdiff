@@ -333,6 +333,7 @@ class RadModel(CosinusModel):
         # units
         self.wradunit = np.log(unit)    # in angstrom**2/ps
 
+
 class RadCosinusModel(RadModel):
     """Derived class, making use of basis functions"""
     def __init__(self,trans,D0,ncosF,ncosD,ncosP,ncosDrad):
@@ -360,3 +361,26 @@ class RadCosinusModel(RadModel):
             self.wrad_coeff = coeff
         self.wrad = self.calc_profile(self.wrad_coeff,self.wrad_basis)
 
+
+class CosinusModelOnlyD(CosinusModel):
+    """
+    Model that uses a constant free energy profile so that the
+    Bayesian analysis can be restricted to the (normal) diffusion profile.
+    """
+    def __init__(self,trans,D0,ncosD,ncosP, fe_profile):
+        """
+        Args:
+            fe_profile (numpy array): Constant free energy profile.
+        """
+        super(CosinusModel, self).__init__(self, trans, D0, 0, ncosD, ncosP)
+        assert
+        self.fe_profile = fe_profile
+
+
+    def calc_profile(self,coeff,basis):
+        a = coeff * basis
+        return np.sum(a,axis=1)
+
+    def update_v(self,coeff=None):
+        assert coeff is None
+        self.v = self.calc_profile(self.v_coeff,self.v_basis)
