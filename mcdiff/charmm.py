@@ -238,7 +238,7 @@ def process_all(config):
         pool.close()
         pool.join()
     else:
-        for id in range(sim_ids):
+        for id in sim_ids:
             mk_matrices(id)
 
     # run mcdiff (parallelize over sim_ids and lag times)
